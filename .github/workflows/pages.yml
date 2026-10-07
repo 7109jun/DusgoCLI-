@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/**"
+      - "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -24,24 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup GitHub Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Verify compiled web files
-        shell: bash
+      - name: Verify site
         run: |
-          set -e
+          test -f "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web/index.html"
+          test -f "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web/dusgo.js"
 
-          SITE_DIR="dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web"
-
-          test -d "$SITE_DIR"
-          test -f "$SITE_DIR/index.html"
-          test -f "$SITE_DIR/dusgo.js"
-
-          echo "GitHub Pages source: $SITE_DIR"
-          find "$SITE_DIR" -maxdepth 2 -type f -print | sort
-
-      - name: Upload GitHub Pages artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web"
@@ -59,6 +50,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
