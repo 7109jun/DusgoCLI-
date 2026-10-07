@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/**'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -24,18 +21,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Configure GitHub Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v6
 
-      - name: Verify compiled site
+      - name: Find compiled site
+        shell: bash
         run: |
-          test -d 'dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled'
-          test -f 'dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/index.html'
+          set -e
+
+          CANDIDATE_1="dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled"
+          CANDIDATE_2="dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/dusgo-stage5-final/compiled"
+          CANDIDATE_3="dusgo-stage5-final/compiled"
+
+          if [ -f "$CANDIDATE_1/index.html" ]; then
+            echo "PAGES_DIR=$CANDIDATE_1" >> "$GITHUB_ENV"
+          elif [ -f "$CANDIDATE_2/index.html" ]; then
+            echo "PAGES_DIR=$CANDIDATE_2" >> "$GITHUB_ENV"
+          elif [ -f "$CANDIDATE_3/index.html" ]; then
+            echo "PAGES_DIR=$CANDIDATE_3" >> "$GITHUB_ENV"
+          else
+            echo "ERROR: compiled/index.html not found."
+            echo "Repository contents:"
+            find . -maxdepth 6 -type f | sort
+            exit 1
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: 'dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled'
+          path: ${{ env.PAGES_DIR }}
 
   deploy:
     needs: build
@@ -50,6 +64,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
