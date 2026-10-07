@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -21,35 +24,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v6
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
 
-      - name: Find compiled site
+      - name: Verify compiled web files
         shell: bash
         run: |
           set -e
 
-          CANDIDATE_1="dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled"
-          CANDIDATE_2="dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/dusgo-stage5-final/compiled"
-          CANDIDATE_3="dusgo-stage5-final/compiled"
+          SITE_DIR="dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web"
 
-          if [ -f "$CANDIDATE_1/index.html" ]; then
-            echo "PAGES_DIR=$CANDIDATE_1" >> "$GITHUB_ENV"
-          elif [ -f "$CANDIDATE_2/index.html" ]; then
-            echo "PAGES_DIR=$CANDIDATE_2" >> "$GITHUB_ENV"
-          elif [ -f "$CANDIDATE_3/index.html" ]; then
-            echo "PAGES_DIR=$CANDIDATE_3" >> "$GITHUB_ENV"
-          else
-            echo "ERROR: compiled/index.html not found."
-            echo "Repository contents:"
-            find . -maxdepth 6 -type f | sort
-            exit 1
-          fi
+          test -d "$SITE_DIR"
+          test -f "$SITE_DIR/index.html"
+          test -f "$SITE_DIR/dusgo.js"
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
+          echo "GitHub Pages source: $SITE_DIR"
+          find "$SITE_DIR" -maxdepth 2 -type f -print | sort
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: ${{ env.PAGES_DIR }}
+          path: "dusgo-cli-javascript-html-1.0.0/dusgo-stage5-final/compiled/web"
 
   deploy:
     needs: build
@@ -64,6 +59,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
