@@ -1,0 +1,24 @@
+{
+  "name": "dusgo-cli",
+  "version": "1.0.0",
+  "private": true,
+  "description": "둣교 CLI — Entry 웹 편집기 기반 개발 CLI",
+  "type": "commonjs",
+  "bin": {
+    "dusgo": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "playwright": "1.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  }
+}
